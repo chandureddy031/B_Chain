@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FinanceAI - Complete Financial Management System</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/web3/1.8.0/web3.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <!-- Wallet Connection Modal -->
+    <div id="walletModal" class="modal">
+        <div class="modal-content">
+            <h2>Connect Your Wallet</h2>
+            <p>Connect your Web3 wallet to access FinanceAI</p>
+            <button id="connectMetaMask" class="btn btn-primary">Connect MetaMask</button>
+            <button id="connectWalletConnect" class="btn btn-secondary">WalletConnect</button>
+            <div id="walletError" class="error-message"></div>
+        </div>
+    </div>
+
+    <!-- Main Application -->
+    <div id="app" class="container" style="display: none;">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo">
+                <h1>💰 FinanceAI</h1>
+                <span class="tagline">AI-Powered Financial Management</span>
+            </div>
+            <div class="wallet-section">
+                <div class="wallet-info">
+                    <div class="wallet-status">
+                        <span class="status-dot connected"></span>
+                        <span>Connected</span>
+                    </div>
+                    <div id="walletAddress" class="wallet-address"></div>
+                    <div id="walletBalance" class="wallet-balance">0 ETH</div>
+                </div>
+                <button id="disconnectWallet" class="btn btn-secondary">Disconnect</button>
+            </div>
+        </header>
+
+        <!-- Dashboard Stats -->
+        <div class="dashboard">
+            <div class="stat-card">
+                <div id="totalBalance" class="stat-value">$0</div>
+                <div class="stat-label">Total Balance</div>
+            </div>
+            <div class="stat-card income">
+                <div id="totalIncome" class="stat-value">$0</div>
+                <div class="stat-label">Monthly Income</div>
+            </div>
+            <div class="stat-card expense">
+                <div id="totalExpenses" class="stat-value">$0</div>
+                <div class="stat-label">Monthly Expenses</div>
+            </div>
+            <div class="stat-card savings">
+                <div id="totalSavings" class="stat-value">$0</div>
+                <div class="stat-label">Savings</div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Transaction Form -->
+            <div class="card">
+                <h3>Add Transaction</h3>
+                <form id="transactionForm">
+                    <div class="form-group">
+                        <label for="transactionType">Type</label>
+                        <select id="transactionType" class="form-control select" required>
+                            <option value="">Select Type</option>
+                            <option value="income">Income</option>
+                            <option value="expense">Expense</option>
+                            <option value="investment">Investment</option>
+                            <option value="transfer">Transfer</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="transactionCategory">Category</label>
+                        <select id="transactionCategory" class="form-control select" required>
+                            <option value="">Select Category</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="transactionAmount">Amount ($)</label>
+                        <input type="number" id="transactionAmount" class="form-control" step="0.01" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="transactionDescription">Description</label>
+                        <input type="text" id="transactionDescription" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="transactionDate">Date</label>
+                        <input type="date" id="transactionDate" class="form-control" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Add Transaction</button>
+                </form>
+            </div>
+
+            <!-- Budget Management -->
+            <div class="card">
+                <h3>Budget Management</h3>
+                <form id="budgetForm">
+                    <div class="form-group">
+                        <label for="budgetCategory">Category</label>
+                        <select id="budgetCategory" class="form-control select" required>
+                            <option value="">Select Category</option>
+                            <option value="food">Food & Dining</option>
+                            <option value="transport">Transportation</option>
+                            <option value="entertainment">Entertainment</option>
+                            <option value="utilities">Utilities</option>
+                            <option value="healthcare">Healthcare</option>
+                            <option value="shopping">Shopping</option>
+                            <option value="education">Education</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="budgetAmount">Monthly Budget ($)</label>
+                        <input type="number" id="budgetAmount" class="form-control" step="0.01" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Set Budget</button>
+                </form>
+                
+                <div id="budgetList" class="budget-list">
+                    <h4>Current Budgets</h4>
+                    <div id="budgetItems"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts and Analytics -->
+        <div class="card">
+            <h3>Financial Analytics</h3>
+            <div class="chart-tabs">
+                <button class="tab-btn active" data-chart="spending">Spending Overview</button>
+                <button class="tab-btn" data-chart="income">Income Trends</button>
+                <button class="tab-btn" data-chart="budget">Budget Analysis</button>
+            </div>
+            <div class="chart-container">
+                <canvas id="financialChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Transactions List -->
+        <div class="card">
+            <h3>Recent Transactions</h3>
+            <div class="transaction-filters">
+                <select id="filterType" class="form-control select">
+                    <option value="">All Types</option>
+                    <option value="income">Income</option>
+                    <option value="expense">Expense</option>
+                    <option value="investment">Investment</option>
+                    <option value="transfer">Transfer</option>
+                </select>
+                <select id="filterCategory" class="form-control select">
+                    <option value="">All Categories</option>
+                </select>
+                <input type="month" id="filterMonth" class="form-control">
+            </div>
+            <div id="transactionsList" class="transactions-list"></div>
+        </div>
+
+        <!-- AI Assistant -->
+        <div class="card ai-section">
+            <div class="ai-insights">
+                <h3>🤖 AI Financial Assistant</h3>
+                <p>Get personalized financial insights and advice powered by AI</p>
+                <div class="ai-stats">
+                    <div id="aiInsights" class="insights-content">
+                        <p>Analyzing your financial data...</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="ai-chat">
+                <h4>Chat with AI Assistant</h4>
+                <div id="chatMessages" class="chat-messages"></div>
+                <div class="chat-input">
+                    <input type="text" id="chatInput" class="form-control" placeholder="Ask about your finances...">
+                    <button id="sendChat" class="btn btn-primary">Send</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Blockchain Transactions -->
+        <div class="card">
+            <h3>Blockchain Integration</h3>
+            <div class="crypto-section">
+                <div class="crypto-balance">
+                    <h4>Your Crypto Portfolio</h4>
+                    <div id="cryptoBalances"></div>
+                </div>
+                <div class="defi-section">
+                    <h4>DeFi Operations</h4>
+                    <button id="stakingBtn" class="btn btn-primary">Staking Rewards</button>
+                    <button id="swapBtn" class="btn btn-secondary">Token Swap</button>
+                    <button id="lendingBtn" class="btn btn-secondary">Lending Pool</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="wallet.js"></script>
+    <script src="ai-service.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
